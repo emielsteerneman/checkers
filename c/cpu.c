@@ -96,6 +96,7 @@ void cpu_recursive_move(int _board[], Move move, int level, RecMove bestMoves[],
 	RecMove newMove;
 
     if(nmoves == 0){	// No more followup moves. End reached
+		if(logv) printf("%s  calculating score..\n", ws);
 		int score = cpu_calcScore(board, piece);		// Calculate board score
 
 		// Initialize newMove
@@ -201,14 +202,20 @@ int calcEndangered(int board[], int piece){
     int other = ~piece & (b | w);
     int andBoard[SIZE*SIZE];
     int n;
+	if(logv) printf("other: %i %c\n", other, pStr[other]);
 
-     // get possible moves
+	// get possible moves
     Move moves[12];
     int nmoves = getMoves(board, moves, other);
 
-    if(nmoves == 0 || abs(moves[0].y - moves[0]._y != 2))
-        return 0;
+	if(logv) printf("%i hits available for %i %c\n", nmoves, other, pStr[other]);
+    if(logv) printf("other: %i %c\n", other, pStr[other]);
 
+    if(nmoves == 0 || abs(moves[0].y - moves[0]._y != 2)){
+        return 0;
+    }
+
+	if(logv) printf("%i hits available for %i %c\n", nmoves, other, pStr[other]);
     // Copy board
     for(n = 0; n < SIZE*SIZE; n++){
         andBoard[n] = board[n] & piece;

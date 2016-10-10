@@ -58,7 +58,7 @@ int main()
 	puts("Checkers");
     srand(time(NULL));
 
-    int board[64] = {
+   /* int board[64] = {
         b, 0, 0, 0, W ,0, b, 0,
         0, 0, 0, 0, 0, 0, 0, b,
         b, 0, b, 0, 0, 0, 0, 0,
@@ -67,8 +67,18 @@ int main()
         0, 0, 0, w, 0, 0, 0, w,
         w, 0, w, 0, B, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0,
-    };
+    };*/
 
+	int board[64] = {
+        0, 0, 0, 0, W ,0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        b, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, b, 0, W, 0, w,
+        b, 0, 0, 0, 0, 0, b, 0,
+        0, 0, 0, w, 0, 0, 0, b,
+        w, 0, w, 0, 0, 0, 0, 0,
+        0, 0, 0, w, 0, w, 0, w,
+    };
     //calcEndangered(board, w);
 
 	Move moves[12 * 4];  // 12 pieces, 4 moves per piece

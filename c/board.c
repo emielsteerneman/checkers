@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-char pStr[] = "_bw3KBW7";
+char pStr[] = "_bw3KBW789ABCDEF";
 int validHops [4][2] = {{1, 1}, {1, -1}, {-1, -1}, {-1, 1}};
 int validHits [4][2] = {{2, 2}, {2, -2}, {-2, -2}, {-2, 2}};
 
@@ -19,10 +19,10 @@ int makeMove(int board[], Move m, Move moves[]){
 		board[(m.y+m._y)/2*SIZE + (m.x+m._x) / 2] = E;
     // Promote black piece
     if(m._y == SIZE - 1 && piece & b)
-		board[m._y * SIZE + m._x] = piece | IS_KING;
+		board[m._y * SIZE + m._x] = (piece | IS_KING);
 	// Promote white piece
-	if(m._y == 0 && piece & w && !(piece & IS_KING))
-		board[m._y * SIZE + m._x] = piece | IS_KING;
+	if(m._y == 0 && piece & w)
+		board[m._y * SIZE + m._x] = (piece | IS_KING);
 
 	// See if there is a next move that has to be taken after a hit
 	int z; int counter = 0;
@@ -82,7 +82,7 @@ void resetBoard(int board[]){
 }
 
 int getMoves(int board[], Move moves[], int piece){
-	// printf("\nGetting all valid moves for piece '%c'\n", pStr[piece]);
+	printf("\nGetting all valid moves for piece '%c'\n", pStr[piece]);
 	int counter = 0;
 
 	int x; int y; int z;
@@ -127,7 +127,7 @@ int getMoves(int board[], Move moves[], int piece){
 			}
 		}
 	}
-
+	printf("\nFound all valid moves for piece '%c'\n", pStr[piece]);
     return counter;
 }
 
