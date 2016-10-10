@@ -202,16 +202,17 @@ int calcEndangered(int board[], int piece){
     int andBoard[SIZE*SIZE];
     int n;
 
+     // get possible moves
+    Move moves[12];
+    int nmoves = getMoves(board, moves, other);
+
+    if(nmoves == 0 || abs(moves[0].y - moves[0]._y != 2))
+        return 0;
+
     // Copy board
     for(n = 0; n < SIZE*SIZE; n++){
         andBoard[n] = board[n] & piece;
     }
-    //printf("\nandBoard:\n");
-    //printBoard(andBoard);
-
-    // get possible moves
-    Move moves[12];
-    int nmoves = getMoves(board, moves, other);
 
     for(n = 0; n < nmoves; n++){
 		werew(board, moves[n], 0, andBoard);
