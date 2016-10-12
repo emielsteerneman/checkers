@@ -47,12 +47,6 @@ int board[64] = {
 };*/
 
 
-int test(int* x){
-	printf("  %i @ %p\n", *x, x);
-	*x = *x + 1;
-	printf("  %i @ %p\n", *x, x);
-}
-
 int main()
 {
 	puts("Checkers");

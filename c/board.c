@@ -82,7 +82,7 @@ void resetBoard(int board[]){
 }
 
 int getMoves(int board[], Move moves[], int piece){
-	printf("\nGetting all valid moves for piece '%c'\n", pStr[piece]);
+	//printf("getMoves: Getting all valid moves for piece '%c' %p\n", pStr[piece], &piece);
 	int counter = 0;
 
 	int x; int y; int z;
@@ -127,7 +127,7 @@ int getMoves(int board[], Move moves[], int piece){
 			}
 		}
 	}
-	printf("\nFound all valid moves for piece '%c'\n", pStr[piece]);
+	//printf("getMoves: Found all valid moves for piece '%c' %p\n", pStr[piece], &piece);
     return counter;
 }
 

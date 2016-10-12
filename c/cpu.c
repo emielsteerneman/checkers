@@ -20,6 +20,7 @@ void cpu_move(int board[], int piece){
 
 	if(log) printf("\ncpu making move\n");
 
+	// Get all moves
     Move moves[12*4];
     int nmoves = getMoves(board, moves, piece);
 	if(log) printf("%i moves found\n", nmoves);
@@ -28,11 +29,12 @@ void cpu_move(int board[], int piece){
 	int nbestMoves = 0;
     int nnode = 0;
 
+    // Make every move
     int z;
-    for(z = 0; z < nmoves; z++){
+    for(z = 0; z < nmoves; z++)
 		cpu_recursive_move(board, moves[z], 0, bestMoves, &nbestMoves, &nnode);
-    }
 
+	// Pick a random move from best moves
 	int r = rand() % nbestMoves;
     RecMove move = bestMoves[r];
 
@@ -72,7 +74,6 @@ void cpu_move(int board[], int piece){
 }
 
 void cpu_recursive_move(int _board[], Move move, int level, RecMove bestMoves[], int* nbestMoves, int* nnode){
-	int r = rand() % 1000;
 	int n;
 	int nodeId = *nnode;
     *nnode = *nnode + 1;
@@ -82,6 +83,9 @@ void cpu_recursive_move(int _board[], Move move, int level, RecMove bestMoves[],
 	for(n = 0; n < level; n++){ ws[n] = ' '; }
 	ws[level] = '\0';
 
+	if(level == 0){
+		printf("\n\n\n");
+	}
 	if(log) printf("%s== %i == %i %i -> %i %i ====\n", ws, nodeId, move.y, move.x, move._y, move._x);
 
 	// Copy board to new board
@@ -96,7 +100,7 @@ void cpu_recursive_move(int _board[], Move move, int level, RecMove bestMoves[],
 	RecMove newMove;
 
     if(nmoves == 0){	// No more followup moves. End reached
-		if(logv) printf("%s  calculating score..\n", ws);
+		if(logv) printf("%scpu_recursive_move: calculating score..\n", ws);
 		int score = cpu_calcScore(board, piece);		// Calculate board score
 
 		// Initialize newMove
@@ -128,7 +132,6 @@ void cpu_recursive_move(int _board[], Move move, int level, RecMove bestMoves[],
         }
 
 	}else{  // One or more folowup moves
-		int bestScore = -1000;
 
         // Try every followup move
 		for(n = 0; n < nmoves; n++){
@@ -152,14 +155,12 @@ void cpu_recursive_move(int _board[], Move move, int level, RecMove bestMoves[],
 
     }
 
-    return newMove;
+    return;
 }
 
 int cpu_calcScore(int board[], int piece){
     int score = 0;
 	int other = ~piece & (b | w);
-	int nmoves = 0;
-	Move moves[12*4];
 
 	int y; int x;
     for(y = 0; y < SIZE; y++){
@@ -173,21 +174,13 @@ int cpu_calcScore(int board[], int piece){
             if(p & other) score --;
             if(p & other && p & IS_KING) score--;
 
-            //printf("\tat %i %i score %i\n", y, x, score);
-            //printf("\t  p %i, other %i, p & other %i, >> %i\n", p, other, p & other, (p & other) >> (other - 1));
         }
     }
 
     score -= calcEndangered(board, piece);
     score += calcEndangered(board, other);
 
-    //nmoves = getMoves(board, moves, piece);
-    //if(nmoves > 0 && abs(moves[0].y - moves[0]._y) == 2) score += nmoves;
-
-	//nmoves = getMoves(board, moves, other);
-    //if(nmoves > 0 && abs(moves[0].y - moves[0]._y) == 2) score -= nmoves;
-
-    return score;
+	return score;
 }
 
 
@@ -198,55 +191,52 @@ int cpu_calcScore(int board[], int piece){
 
 
 int calcEndangered(int board[], int piece){
-	if(logv) printf("Calculating endangered for %c\n", pStr[piece]);
+
     int other = ~piece & (b | w);
     int andBoard[SIZE*SIZE];
     int n;
-	if(logv) printf("other: %i %c\n", other, pStr[other]);
+
+	if(logv) printf("-calcEndangered: Calculating endangered for %i '%c' %p, other is %i '%c' %p\n", piece, pStr[piece], &piece, other, pStr[other], &other);
 
 	// get possible moves
     Move moves[12];
     int nmoves = getMoves(board, moves, other);
 
-	if(logv) printf("%i hits available for %i %c\n", nmoves, other, pStr[other]);
-    if(logv) printf("other: %i %c\n", other, pStr[other]);
+	if(logv) printf("calcEndangered: %i hits available for %i %c %p\n", nmoves, other, pStr[other], &other);
 
     if(nmoves == 0 || abs(moves[0].y - moves[0]._y != 2)){
         return 0;
     }
 
-	if(logv) printf("%i hits available for %i %c\n", nmoves, other, pStr[other]);
     // Copy board
-    for(n = 0; n < SIZE*SIZE; n++){
+    for(n = 0; n < SIZE*SIZE; n++)
         andBoard[n] = board[n] & piece;
-    }
 
-    for(n = 0; n < nmoves; n++){
-		werew(board, moves[n], 0, andBoard);
-    }
+	// Make every move
+    for(n = 0; n < nmoves; n++)
+		cpu_recursive_and(board, moves[n], 0, andBoard);
 
+	// Get amount of pieces left on board
     int total = 0; int left = 0;
     for(n = 0; n < SIZE*SIZE; n++){
         if(board[n]   & piece) total++;
         if(andBoard[n]& piece) left++;
     }
-    if(logv) printf("\ntotal = %i, left = %i, endangered = %i\n", total, left, total-left);
+    if(logv) printf("\ncalcEndangered: total = %i, left = %i, endangered = %i\n", total, left, total-left);
     return total - left;
 
 }
 
-void werew(int _board[], Move move, int level, int andBoard[]){  ////// ADD _ANDBOARD
-	int r = rand() % 1000;
+void cpu_recursive_and(int _board[], Move move, int level, int andBoard[]){  ////// ADD _ANDBOARD
 	int n;
 
 	// Whitespace
 	char ws[level+1];
 	for(n = 0; n < level; n++){ ws[n] = ' '; }
 	ws[level] = '\0';
-	//printf("%s==== %i %i -> %i %i ====\n", ws, move.y, move.x, move._y, move._x);
+	printf("%s==== %i %i -> %i %i ====\n", ws, move.y, move.x, move._y, move._x);
 
 	// Copy board to new board
-	int piece = _board[move.y * SIZE + move.x];
 	int board[SIZE * SIZE];
 	for(n = 0; n < SIZE*SIZE; n++)	board[n] = _board[n];
 
@@ -272,7 +262,7 @@ void werew(int _board[], Move move, int level, int andBoard[]){  ////// ADD _AND
 	}else{  // One or more folowup moves
 		// Try every followup move
 		for(n = 0; n < nmoves; n++){
-			werew(board, moves[n], level + 4, andBoard);
+			cpu_recursive_and(board, moves[n], level + 4, andBoard);
 		}
     }
 }
