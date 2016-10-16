@@ -5,6 +5,11 @@ extern int B;
 extern int w;
 extern int W;
 extern int IS_KING;
+extern int IS_PIECE;
+
+extern int log;
+extern int logv;
+extern int logvv;
 
 typedef struct {
 	int y;

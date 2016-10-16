@@ -133,20 +133,20 @@ int getMoves(int board[], Move moves[], int piece){
 
 int isMove(int board[], Move move){
 
-    //printf("  isMove %c %i %i -> %i %i   ", pStr[board[move.y*SIZE + move.x]], move.y, move.x, move._y, move._x);
+    if(logvv) printf("  isMove %c %i %i -> %i %i", pStr[board[move.y*SIZE + move.x]], move.y, move.x, move._y, move._x);
 	// Check y and _y in board
 	if(move.y < 0  || SIZE - 1 < move.y  || move.x < 0  || SIZE - 1 < move.x){
-	//	printf("\t'from' coord out of range\n");
+		if(logvv) printf("\t'from' coord out of range\n");
 		return 0;
 	}
 	// Check x and _x in board
 	if(move._y < 0 || SIZE - 1 < move._y || move._x < 0 || SIZE - 1 < move._x){
-	//	printf("\t'to' coord out of range\n");
+		if(logvv) printf("\t'to' coord out of range\n");
 		return 0;
 	}
 	// Check empty
 	if(board[move._y * SIZE + move._x] != E){
-	//	printf("\t'to' not empty\n");
+		if(logvv) printf("\t'to' not empty\n");
 		return 0;
 	}
 
@@ -159,33 +159,33 @@ int isMove(int board[], Move move){
 
 	// Check y-distance
 	if(dy != 1 && dy != 2){
-	//	printf("\ty-distance incorrect\n");
+		if(logvv) printf("\ty-distance incorrect\n");
 		return 0;
 	}
 	// Check x-distance
 	if(dx != 1 && dx != 2){
-	//	printf("\tx-distance incorrect\n");
+		if(logvv) printf("\tx-distance incorrect\n");
 		return 0;
 	}
 	// Check y-distance == x-distance
 	if(dy != dx){
-	//	printf("\ty-distance not equal to x-distance\n");
+		if(logvv) printf("\ty-distance not equal to x-distance\n");
 		return 0;
 	}
 	// Check hit
 	if(dy == 2){
 		int hit = board[((move.y+move._y)/2)*SIZE + (move.x+move._x)/2];
 		if(!(hit & other)){
-	//		printf("\tno piece hit\n");
+			if(logvv) printf("\tno piece hit\n");
 			return 0;
 		}
 	}
 	// Check direction for normal piece
     if(!(piece & IS_KING || abs(move._y - move.y - dir) < 2)){
-	//	printf("\tpiece goes in wrong direction\n");
+		if(logvv) printf("\tpiece goes in wrong direction\n");
 		return 0;
     }
 
-	//printf("\n");
+	if(logvv) printf("  valid\n");
     return 1;
 }

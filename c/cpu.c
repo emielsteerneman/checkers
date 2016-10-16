@@ -5,9 +5,6 @@
 #include <stdlib.h>
 #include <time.h>
 
-int log = 1;
-int logv = 1;
-
 void printStruct(RecMove m){
     printf("RecMove: nnode = %i, score = %i, nmoves = %i | ", m.nnode, m.score, m.nmoves);
     for(int z = m.nmoves - 1; z >= 0; z--){
@@ -18,14 +15,13 @@ void printStruct(RecMove m){
 
 void cpu_move(int board[], int piece){
 
-	if(log) printf("\ncpu making move\n");
-
 	// Get all moves
     Move moves[12*4];
     int nmoves = getMoves(board, moves, piece);
-	if(log) printf("%i moves found\n", nmoves);
 
-	RecMove bestMoves[100];
+	if(log) printf("CPU moving piece %c, %i moves found\n", pStr[piece], nmoves);
+
+	RecMove bestMoves[100]; // Should be enough..
 	int nbestMoves = 0;
     int nnode = 0;
 
@@ -73,6 +69,8 @@ void cpu_move(int board[], int piece){
     }
 }
 
+
+
 void cpu_recursive_move(int _board[], Move move, int level, RecMove bestMoves[], int* nbestMoves, int* nnode){
 	int n;
 	int nodeId = *nnode;
@@ -83,8 +81,8 @@ void cpu_recursive_move(int _board[], Move move, int level, RecMove bestMoves[],
 	for(n = 0; n < level; n++){ ws[n] = ' '; }
 	ws[level] = '\0';
 
-	if(level == 0){
-		printf("\n\n\n");
+	if(level == 0 && logv == 1){
+		printf("\n");
 	}
 	if(log) printf("%s== %i == %i %i -> %i %i ====\n", ws, nodeId, move.y, move.x, move._y, move._x);
 
@@ -100,8 +98,7 @@ void cpu_recursive_move(int _board[], Move move, int level, RecMove bestMoves[],
 	RecMove newMove;
 
     if(nmoves == 0){	// No more followup moves. End reached
-		if(logv) printf("%scpu_recursive_move: calculating score..\n", ws);
-		int score = cpu_calcScore(board, piece);		// Calculate board score
+		int score = cpu_calcScore(board, piece, level+2);		// Calculate board score
 
 		// Initialize newMove
 		newMove.nmoves = 1;                             // set nmoves
@@ -112,21 +109,21 @@ void cpu_recursive_move(int _board[], Move move, int level, RecMove bestMoves[],
         if(*nbestMoves > 0){    // If there are already best moves
 			int curBestScore = bestMoves[*nbestMoves - 1].score;	// Get score of current best score
 			if(curBestScore < score){								// If new score is better
-				if(log) printf("%s  Better %i > %i\n", ws, score, curBestScore);
+				if(log) printf("%sBetter %i > %i\n", ws, score, curBestScore);
 				bestMoves[0] = newMove;                                     // Reset bestMoves[]
 				*nbestMoves = 1;                                            // Reset nbestMoves
 			}else
 			if(curBestScore == score){                              // If new score is equal
-                if(log) printf("%s  Same %i == %i\n", ws, score, curBestScore);
+                if(log) printf("%sSame %i == %i\n", ws, score, curBestScore);
                 bestMoves[*nbestMoves] = newMove;                           // Add move to bestMoves[]
                 *nbestMoves = *nbestMoves + 1;                              // Increment nbestMoves
 			}else{                                                  // If new score is worse
-				if(log) printf("%s  Worse %i < %i\n", ws, score, curBestScore);
+				if(log) printf("%sWorse %i < %i\n", ws, score, curBestScore);
 			}
 			// printBoard(board);
         }else
         if(*nbestMoves == 0){   // If this is the first move
-			if(log) printf("%s  First %i. %i\n", ws, newMove.nnode, score);
+			if(log) printf("%sFirst %i. %i\n", ws, newMove.nnode, score);
 			bestMoves[0] = newMove;         // Reset bestMoves[]
 			*nbestMoves = 1;                // Reset nbestMoves
         }
@@ -158,27 +155,53 @@ void cpu_recursive_move(int _board[], Move move, int level, RecMove bestMoves[],
     return;
 }
 
-int cpu_calcScore(int board[], int piece){
-    int score = 0;
+int cpu_calcScore(int board[], int piece, int level){
+    int score = 0; int n;
+    piece = piece & IS_PIECE;
 	int other = ~piece & (b | w);
 
+	// Whitespace
+	char ws[level+1];
+	for(n = 0; n < level; n++){ ws[n] = ' '; }
+	ws[level] = '\0';
+
+	if(logv) printf("%scpu_calcScore: calculating score for '%c'\n", ws, pStr[piece]);
+
 	int y; int x;
+	int _p = 0; int _pk = 0; int _b = 0; int _bk = 0;
+
+	if(_p == 0) return -100;
+	if(_b == 0) return  100;
+
     for(y = 0; y < SIZE; y++){
         for(x = 0; x < SIZE; x++){
 
             int p = board[y * SIZE + x];
 
-            if(p & piece) score ++;
-            if(p & piece && p & IS_KING) score++;
+            if(p & piece) _p++;
+            if(p & piece && p & IS_KING) _pk++;
 
-            if(p & other) score --;
-            if(p & other && p & IS_KING) score--;
+            if(p & other) _b++;
+            if(p & other && p & IS_KING) _bk++;
 
         }
     }
+    score = _p + _pk - _b - _bk;
 
-    score -= calcEndangered(board, piece);
-    score += calcEndangered(board, other);
+    if(logv){
+        printf("%scpu_calcScore: current score: %i | p %i | pk %i | b %i | bk %i\n", ws, score, _p, _pk, _b, _bk);
+
+        x = calcEndangered(board, piece, level+2);
+        score -= x;
+        printf("%scpu_calcScore: endangered for %c: %i | new score: %i\n", ws, pStr[piece], x, score);
+
+        x = calcEndangered(board, other, level+2);
+        score += x;
+        printf("%scpu_calcScore: endangered for %c: %i | new score: %i\n", ws, pStr[other], x, score);
+    }else{
+        score -= calcEndangered(board, piece, 0);
+        score += calcEndangered(board, other, 0);
+    }
 
 	return score;
 }
@@ -190,23 +213,37 @@ int cpu_calcScore(int board[], int piece){
 
 
 
-int calcEndangered(int board[], int piece){
+int calcEndangered(int board[], int piece, int level){
 
     int other = ~piece & (b | w);
     int andBoard[SIZE*SIZE];
     int n;
 
-	if(logv) printf("-calcEndangered: Calculating endangered for %i '%c' %p, other is %i '%c' %p\n", piece, pStr[piece], &piece, other, pStr[other], &other);
+    // Whitespace
+	char ws[level+1];
+	for(n = 0; n < level; n++){ ws[n] = ' '; }
+	ws[level] = '\0';
+
+	if(logv) printf("%scalcEndangered: Calculating endangered for '%c'\n", ws, pStr[piece]);
+    //if(logv) printBoard(board);
 
 	// get possible moves
-    Move moves[12];
+    Move moves[4*12];
     int nmoves = getMoves(board, moves, other);
 
-	if(logv) printf("calcEndangered: %i hits available for %i %c %p\n", nmoves, other, pStr[other], &other);
+	for(n = 0; n < nmoves; n++){
+        // cprintf("    move %i: %i %i -> %i %i\n", n, moves[n].y, moves[n].x, moves[n]._y, moves[n]._x);
+    }
 
-    if(nmoves == 0 || abs(moves[0].y - moves[0]._y != 2)){
+    if(nmoves == 0 || abs(moves[0].y - moves[0]._y) != 2){
+        if(logv) printf("%scalcEndangered: no hit moves available for '%c'\n", ws, pStr[other]);
+        //if(nmoves > 0) printf("calcEndangered: %i %i %i %i\n", nmoves, moves[0].y, moves[0]._y, abs(moves[0].y - moves[0]._y));
+
         return 0;
     }
+
+    if(logv) printf("%scalcEndangered: %i moves available '%c'\n", ws, nmoves, pStr[other]);
+
 
     // Copy board
     for(n = 0; n < SIZE*SIZE; n++)
@@ -214,7 +251,7 @@ int calcEndangered(int board[], int piece){
 
 	// Make every move
     for(n = 0; n < nmoves; n++)
-		cpu_recursive_and(board, moves[n], 0, andBoard);
+		cpu_recursive_and(board, moves[n], level+4, andBoard);
 
 	// Get amount of pieces left on board
     int total = 0; int left = 0;
@@ -222,7 +259,7 @@ int calcEndangered(int board[], int piece){
         if(board[n]   & piece) total++;
         if(andBoard[n]& piece) left++;
     }
-    if(logv) printf("\ncalcEndangered: total = %i, left = %i, endangered = %i\n", total, left, total-left);
+    if(logv) printf("%scalcEndangered: total = %i, left = %i, endangered = %i\n", ws, total, left, total-left);
     return total - left;
 
 }
@@ -234,7 +271,7 @@ void cpu_recursive_and(int _board[], Move move, int level, int andBoard[]){  ///
 	char ws[level+1];
 	for(n = 0; n < level; n++){ ws[n] = ' '; }
 	ws[level] = '\0';
-	printf("%s==== %i %i -> %i %i ====\n", ws, move.y, move.x, move._y, move._x);
+	if(logv) printf("%s==== %i %i -> %i %i ====\n", ws, move.y, move.x, move._y, move._x);
 
 	// Copy board to new board
 	int board[SIZE * SIZE];
@@ -266,15 +303,4 @@ void cpu_recursive_and(int _board[], Move move, int level, int andBoard[]){  ///
 		}
     }
 }
-
-
-
-
-
-
-
-
-
-
-
 
