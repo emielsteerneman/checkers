@@ -67,6 +67,30 @@ void printBoard(int board[]){
     return;
 }
 
+void board_print2(int board1[], int board2[]){
+
+    int x; int y;
+
+    // First row
+    printf("\n  ");
+    for(x = 0; x < SIZE; x++) printf("%i ", x);
+    for(x = 0; x < 4;    x++) printf(" ");
+    for(x = 0; x < SIZE; x++) printf("%i ", x);
+    printf("\n");
+
+	// Middle rows
+    for(y = 0; y < SIZE; y++){
+        printf("%i|", y);
+        for(x = 0; x < SIZE; x++) printf("%c|", pStr[board1[y * SIZE + x]]);
+        for(x = 0; x < 2;    x++) printf(" ");
+        printf("%i|", y);
+        for(x = 0; x < SIZE; x++) printf("%c|", pStr[board2[y * SIZE + x]]);
+        printf("\n");
+    }
+
+    return;
+}
+
 void resetBoard(int board[]){
     int x; int y;
     for(y = 0; y < SIZE; y++){

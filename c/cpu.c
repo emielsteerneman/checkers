@@ -13,11 +13,14 @@ void printStruct(RecMove m){
     printf("\n");
 }
 
-void cpu_move(int board[], int piece){
+int cpu_move(int board[], int piece){
 
 	// Get all moves
     Move moves[12*4];
     int nmoves = getMoves(board, moves, piece);
+    if(nmoves == 0)
+        return 0;
+
 
 	if(log) printf("CPU moving piece %c, %i moves found\n", pStr[piece], nmoves);
 
@@ -67,6 +70,8 @@ void cpu_move(int board[], int piece){
         }
         printf("\n");
     }
+
+    return nmoves;
 }
 
 
@@ -170,9 +175,6 @@ int cpu_calcScore(int board[], int piece, int level){
 	int y; int x;
 	int _p = 0; int _pk = 0; int _b = 0; int _bk = 0;
 
-	if(_p == 0) return -100;
-	if(_b == 0) return  100;
-
     for(y = 0; y < SIZE; y++){
         for(x = 0; x < SIZE; x++){
 
@@ -187,6 +189,9 @@ int cpu_calcScore(int board[], int piece, int level){
         }
     }
     score = _p + _pk - _b - _bk;
+
+	if(_p == 0) return -100;
+	if(_b == 0) return  100;
 
     if(logv){
         printf("%scpu_calcScore: current score: %i | p %i | pk %i | b %i | bk %i\n", ws, score, _p, _pk, _b, _bk);

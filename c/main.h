@@ -11,6 +11,8 @@ extern int log;
 extern int logv;
 extern int logvv;
 
+void run(int nruns);
+
 typedef struct {
 	int y;
 	int x;

@@ -17,65 +17,21 @@ int IS_PIECE = 0b011;
 int log = 0;
 int logv = 0;
 int logvv = 0;
-/*
-int board[64] = {
-	1, 0, 1, 0, 1, 0, 1, 0,
-	0, 1, 0, 1, 0, 1, 0, 1,
-	1, 0, 1, 0, 1, 0, 0, 0,
-	0, 0, 0, 0, 0, 1, 0, 0,
-	0, 0, 0, 0, 4, 0, 12, 0,
-	0, 4, 0, 0, 0, 4, 0, 0,
-	4, 0, 4, 0, 4, 0, 0, 0,
-	0, 0, 0, 4, 0, 0, 0, 4,
-};*/
-/*
-int board[64] = {
-	1, 0, 1, 0, 1, 0, 1, 0,
-	0, 1, 0, 1, 0, 1, 0, 1,
-	1, 0, 1, 0, 1, 0, 1, 0,
-	0, 4, 0, 0, 0, 4, 0, 4,
-	0, 0, 0, 0, 0, 0, 0, 0,
-	0, 4, 0, 4, 0, 4, 0, 4,
-	4, 0, 4, 0, 0, 0, 4, 0,
-	0, 4, 0, 0, 0, 4, 0, 4,
-};*/
-/*int board[64] = {
-	1, 0, 1, 0, 1, 0, 1, 0,
-	0, 1, 0, 1, 0, 1, 0, 1,
-	1, 0, 1, 0, 1, 0, 1, 0,
-	0, 4, 0, 4, 0, 4, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0,
-	0, 4, 0, 4, 0, 4, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0,
-};*/
-
 
 int main()
 {
 	puts("Checkers");
     srand(time(NULL));
 
-   /* int board[64] = {
-        b, 0, 0, 0, W ,0, b, 0,
-        0, 0, 0, 0, 0, 0, 0, b,
-        b, 0, b, 0, 0, 0, 0, 0,
-        0, b, 0, 0, 0, 0, 0, w,
-        w, 0, w, 0, 0, 0, w, 0,
-        0, 0, 0, w, 0, 0, 0, w,
-        w, 0, w, 0, B, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0,
-    };*/
-
 	int board[64] = {
-        0, 0, 0, 0, 0 ,0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0,
-        0, W, 0, 0, 0, W, 0, w,
-        0, 0, 0, 0, 0, 0, b, 0,
-        0, 0, 0, 0, 0, B, 0, b,
-        w, 0, b, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, w, 0, 0,
+        b, 0, b, 0, b ,0, 0, 0,
+        0, b, 0, b, 0, b, 0, b,
+        b, 0, b, 0, 0, 0, b, 0,
+        0, 0, 0, 0, 0, b, 0, 0,
+        w, 0, 0, 0, w, 0, 0, 0,
+        0, 0, 0, w, 0, b, 0, w,
+        w, 0, w, 0, w, 0, w, 0,
+        0, w, 0, w, 0, 0, 0, w,
     };
     //calcEndangered(board, w);
 
@@ -118,6 +74,9 @@ int main()
 			cpu_move(board, i1);
 			printBoard(board);
 		}else
+		if(strcmp(cmd, "run") == 0){
+			run(10);
+		}else
 		{
 			// Unknown command
 		}
@@ -126,7 +85,34 @@ int main()
     return 0;
 }
 
+void run(int nruns){
+    int n; int c; int z;
 
+    int board[SIZE*SIZE];
+    int _board[SIZE*SIZE];
+    resetBoard(board);
+
+    for(n = 0; n < 1; n++){
+        int nmoves = 1;
+        c = 0;
+        while(c < 30){
+            c++;
+            nmoves = cpu_move(board, b);
+            if(nmoves == 0) break;
+
+            for(z = 0; z< 64; z++) _board[z] = board[z];
+
+            nmoves = cpu_move(board, w);
+            if(nmoves == 0) break;
+
+            board_print2(_board, board);
+        }
+    }
+    printf("\nFinal score | b %i | w %i\n", cpu_calcScore(board, b, 4), cpu_calcScore(board, w, 4));
+
+    board_print2(board, board);
+
+}
 
 
 
